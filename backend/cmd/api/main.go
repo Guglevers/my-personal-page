@@ -1,19 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
+	handler "my-personal-page/backend/internal/handler"
 )
 
 func main() {
-	fmt.Println("Programa iniciado")
-	var response string = "Hello you requested: "
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Request iniciado")
-		response += "\n" + r.URL.Path
-		fmt.Fprintf(w, "%s", response)
-	})
+	http.HandleFunc("/post", handler.NewPostHandler(http.ResponseWriter, &http.Request))
 
 	http.ListenAndServe(":80", nil)
 }
