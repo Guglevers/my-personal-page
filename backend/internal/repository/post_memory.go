@@ -6,16 +6,24 @@ import (
 
 type PostRepository interface {
 	Create(post *domain.Post) error
+	Get() ([]domain.Post, error)
 }
 
 type PostMemoryRepo struct {
 	posts []domain.Post
 }
 
-func newPostMemoryRepo() *PostMemoryRepo {
-	return &PostMemoryRepo{}
+func NewPostMemoryRepo() *PostMemoryRepo{
+	return &PostMemoryRepo{
+		posts: make([]domain.Post, 0),
+	}
 }
 
-func (p *PostMemoryRepo) Create(post domain.Post) {
-	p.posts = append(p.posts, post)
+func (p *PostMemoryRepo) Create(post *domain.Post) error{
+	p.posts = append(p.posts, *post)
+	return nil  
+}
+
+func (p *PostMemoryRepo) Get() ([]domain.Post, error) {
+	return p.posts, nil
 }

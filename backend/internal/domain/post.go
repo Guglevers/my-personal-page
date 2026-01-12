@@ -1,8 +1,10 @@
 package domain
 
+import "time"
+
 type Post struct {
-	ID         int 
-	created_at int 
-	Title      string `JSON:"title"`      
-	Content    string `JSON:"content"`
+	ID        int       `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
 }
