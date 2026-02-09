@@ -4,11 +4,6 @@ import (
 	"my-personal-page/backend/internal/domain"
 )
 
-type PostRepository interface {
-	Create(post *domain.Post) error
-	Get() ([]domain.Post, error)
-}
-
 type PostMemoryRepo struct {
 	posts []domain.Post
 }

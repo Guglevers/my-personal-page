@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"my-personal-page/backend/internal/domain"
 	"my-personal-page/backend/internal/repository"
@@ -14,14 +15,41 @@ func NewPostService(repo repository.PostRepository) *PostService {
 	return &PostService{repo : repo}
 }
 
-func (p *PostService) CreatePost(post domain.Post) error {
+func (p *PostService) CreatePost(ctx context.Context, post domain.Post) (domain.Post, error) {
     if post.Title == "" || post.Content == "" {
-        return errors.New("title and content are required")
+        return domain.Post{}, errors.New("title and content are required")
     }
-    return p.repo.Create(&post)
+    return p.repo.Create(ctx, &post)
 }
 
-func (p *PostService) GetPosts() ([]domain.Post, error) {
-	posts, err := p.repo.Get()
-	return posts, err
+func (p *PostService) Get(ctx context.Context, id int64) (domain.Post, error){
+	post, err := p.repo.Get(ctx, id)
+	if err != nil {
+		return domain.Post{}, err 
+	}
+	return post, nil
+}
+
+func (p *PostService) GetAll(ctx context.Context) ([]domain.Post, error) {
+	posts, err := p.repo.GetAll(ctx)
+	if err != nil {
+		return []domain.Post{}, err
+	}
+	return posts, nil
+}
+
+func (p *PostService) Delete(ctx context.Context, id int64) (domain.Post, error){
+	post, err := p.repo.Delete(ctx, id)
+	if err != nil {
+		return domain.Post{}, err
+	}
+	return post, nil
+}
+
+func (p *PostService) Update(ctx context.Context, newPost domain.Post) (domain.Post, error){
+	post, err := p.repo.Update(ctx, &newPost)
+	if err != nil {
+		return domain.Post{}, err
+	}
+	return post, nil
 }
