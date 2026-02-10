@@ -15,7 +15,7 @@ func NewPostService(repo repository.PostRepository) *PostService {
 	return &PostService{repo : repo}
 }
 
-func (p *PostService) CreatePost(ctx context.Context, post domain.Post) (domain.Post, error) {
+func (p *PostService) Create(ctx context.Context, post domain.Post) (domain.Post, error) {
     if post.Title == "" || post.Content == "" {
         return domain.Post{}, errors.New("title and content are required")
     }

@@ -8,6 +8,7 @@ import (
 	ctxUtil "my-personal-page/backend/internal/context_util"
 	db "my-personal-page/backend/internal/db/generated"
 	"my-personal-page/backend/internal/domain"
+	"time"
 )
 
 type PostRepo struct {
@@ -24,7 +25,7 @@ func (repo *PostRepo) Create(ctx context.Context, post *domain.Post) (domain.Pos
 	row, err := repo.q.CreatePosts(ctx, db.CreatePostsParams{
 		Title:     post.Title,
 		Content:   post.Content,
-		CreatedAt: post.CreatedAt,
+		CreatedAt: time.Now(),
 	})
 
 	if err != nil {

@@ -15,56 +15,61 @@ type PostHandler struct {
 	service *service.PostService
 }
 
-type CreatePostResponse struct {
-	Message string      `json:"message"`
-	Post    domain.Post `json:"post"`
+type CreatePostRequest struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
 }
 
 func NewPostHandler(service *service.PostService) *PostHandler {
 	return &PostHandler{service: service}
 }
 
-func (h *PostHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var input domain.Post
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+	var req CreatePostRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return
 	}
 
-	created, err := h.service.CreatePost(ctx, input)
+	post := domain.Post{
+		Title: req.Title,
+		Content:  req.Content,
+	}
+
+	created, err := h.service.Create(ctx, post)
 	if err != nil {
-		http.Error(w, "Failed to create post", http.StatusInternalServerError)
+		http.Error(w, "failed to create post", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(CreatePostResponse{
-		Message: "Post created successfully",
-		Post:    created,
-	})
+	if err := json.NewEncoder(w).Encode(created); err != nil {
+		http.Error(w, "failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
 }
 
-func (h *PostHandler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	posts, err := h.service.GetAll(ctx)
-
 	if err != nil {
 		http.Error(w, "Failed to get posts", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		http.Error(w, "failed to encode JSON", http.StatusInternalServerError)
 		return
 	}
 }
 
-func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	idStr := chi.URLParam(r, "id")
@@ -86,11 +91,12 @@ func (h *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(post); err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		http.Error(w, "failed to encode JSON", http.StatusInternalServerError)
 	}
 }
-func (h *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
+func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	idStr := chi.URLParam(r, "id")
@@ -103,7 +109,44 @@ func (h *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 	post, err := h.service.Delete(ctx, id)
 
 	if err != nil {
-		if
+		if errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "post not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "failed to get post", http.StatusInternalServerError)
+		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(post); err != nil {
+		http.Error(w, "failed to encode JSON", http.StatusInternalServerError)
+	}
+}
+
+func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request){
+	ctx := r.Context()
+	
+	var input domain.Post
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	post, err := h.service.Update(ctx, input)
+
+	if err != nil {
+		if errors.Is(err, domain.ErrNotFound) {
+			http.Error(w, "post not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "failed to get post", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(post); err != nil {
+		http.Error(w, "failed to encode JSON", http.StatusInternalServerError)
+	}
 }
