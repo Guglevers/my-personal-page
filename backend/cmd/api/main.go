@@ -1,9 +1,9 @@
 package main
 
 import (
-	_ "embed"
 	"context"
 	"database/sql"
+	_ "embed"
 	"log"
 	"my-personal-page/backend/internal/db"
 	postsDB "my-personal-page/backend/internal/db/generated"
@@ -19,7 +19,7 @@ import (
 func run() (*postsDB.Queries, error) {
 	ctx := context.Background()
 
-	dbConn, err := sql.Open("sqlite3", ":memory:")
+	dbConn, err := sql.Open("sqlite3", ":memory:?_loc=auto")
 	if err != nil {
 		return nil, err
 	}

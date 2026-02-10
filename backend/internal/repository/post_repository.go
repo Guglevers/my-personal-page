@@ -25,13 +25,14 @@ func (repo *PostRepo) Create(ctx context.Context, post *domain.Post) (domain.Pos
 	row, err := repo.q.CreatePosts(ctx, db.CreatePostsParams{
 		Title:     post.Title,
 		Content:   post.Content,
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
 	})
 
 	if err != nil {
 		if ctxUtil.IsContextErr(err) {
 			return domain.Post{}, err
 		}
+		fmt.Printf("create post error: %v\n", err)
 		return domain.Post{}, fmt.Errorf("create post: %w", err)
 	}
 
@@ -108,7 +109,7 @@ func (repo *PostRepo) Delete(ctx context.Context, id int64) (domain.Post, error)
 	}, nil
 }
 
-func (repo *PostRepo) Update(ctx context.Context, post *domain.Post) (domain.Post, error) {
+func (repo *PostRepo) Update(ctx context.Context, post *db.UpdatePostsParams) (domain.Post, error) {
 	row, err := repo.q.UpdatePosts(ctx, db.UpdatePostsParams{
 		Title:   post.Title,
 		Content: post.Content,

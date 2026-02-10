@@ -3,6 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	db "my-personal-page/backend/internal/db/generated"
 	"my-personal-page/backend/internal/domain"
 	"my-personal-page/backend/internal/service"
 	"net/http"
@@ -34,8 +36,8 @@ func (h *PostHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	post := domain.Post{
-		Title: req.Title,
-		Content:  req.Content,
+		Title:   req.Title,
+		Content: req.Content,
 	}
 
 	created, err := h.service.Create(ctx, post)
@@ -124,12 +126,12 @@ func (h *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request){
+func (h *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	
-	var input domain.Post
+	var input db.UpdatePostsParams
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "invalid request body", http.StatusBadRequest)
+		fmt.Printf("update post error: %v\n", err)
 		return
 	}
 
